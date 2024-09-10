@@ -1,11 +1,13 @@
 const express =require('express')
 const dotenv =require('dotenv')
+const bootstrap =require('./routes/index.route')
+
+
 dotenv.config()
 const app =express()
-// const bootstrap =require('./routes/index.routes')
 
 
-// bootstrap(app,express);
+bootstrap(app,express);
 
 
 
