@@ -2,22 +2,22 @@ const sequelize = require("../config/db.config");
 const { DataTypes } = require("sequelize");
 const User = require("./user.model");
 const Experience = sequelize.define("experience", {
-  user_Id: {
+  user_id: {
     type: DataTypes.INTEGER,
     references: {
       model: User,
-      key: "user_id",
+      key: "id",
     },
     primaryKey: true,
   },
   companyName: {
     type: DataTypes.STRING,
     allowNull: false,
-    primaryKey: true,
   },
   startDate: {
     type: DataTypes.DATE,
     allowNull: false,
+    primaryKey: true,
     validate: {
       isDateInThePast(value) {
         const currentDate = Date.now();

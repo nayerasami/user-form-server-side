@@ -4,12 +4,12 @@ const Permissions =require('./permissions.model');
 const Countries =require('./countries.model');
 
 
-User.hasMany(Experience)
-Experience.belongsTo(User)
+User.hasMany(Experience,{foreignKey:'user_id'})
+Experience.belongsTo(User,{foreignKey:'user_id'})
 
 
-Countries.hasMany(User)
-User.belongsTo(Countries)
+Countries.hasMany(User,{ foreignKey: 'phoneKey' })
+User.belongsTo(Countries,{ foreignKey: 'phoneKey' })
 
 User.belongsToMany(Permissions,{
     through:'user_permissions'

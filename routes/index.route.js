@@ -1,7 +1,13 @@
 const cors = require("cors");
 const sequelize = require("../config/db.config");
-const { globalErrorHandling } = require("../utilities/globalErrorHandling");
 const ApiError = require("../utilities/ErrorClass.js");
+const { globalErrorHandling } = require("../utilities/globalErrorHandling");
+const userRouter =require('./user.routes.js');
+const countriesRouter =require('./countries.routes.js');
+const permissionsRouter =require('./permission.routes.js');
+const experienceRouter =require('./experience.routes.js');
+
+
 const bootstrap = (app, express) => {
   app.use(express.json());
   const corsOptions = {
@@ -16,7 +22,10 @@ const bootstrap = (app, express) => {
   });
  // Routing set up
 
-
+ app.use("/api/v1/users",userRouter );
+ app.use("/api/v1/countries",countriesRouter );
+ app.use("/api/v1/permissions", permissionsRouter );
+ app.use("/api/v1/experience", experienceRouter );
 
  
   app.use("*", (req, res, next) => {

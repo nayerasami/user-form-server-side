@@ -3,7 +3,7 @@ const { DataTypes } = require("sequelize");
 const Countries = require("./countries.model");
 
 const User = sequelize.define("user", {
-  user_id: {
+  id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
@@ -13,14 +13,15 @@ const User = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-      is: /^[\\u0600-\\u06FF\\s]+$/i,
-    },
+      is: /^[\u0600-\u06FF\s]+$/u,
+
+        },
   },
   lastNameAR: {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-      is: /^[\\u0600-\\u06FF\\s]+$/i,
+        is: /^[\u0600-\u06FF\s]+$/u,
     },
   },
   firstNameEN: {
@@ -45,11 +46,11 @@ const User = sequelize.define("user", {
       is: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$$/i,
     },
   },
-  cityKey: {
+  phoneKey: {
     type: DataTypes.INTEGER,
     references: {
       model: Countries,
-      key: "country_id",
+      key: "id",
     },
   },
   phoneNumber: {
@@ -76,7 +77,7 @@ const User = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-      is: /^[\\u0600-\\u06FF\\s]+$/i,
+        is: /^[\u0600-\u06FF\s]+$/u,
     },
   },
   addressEN: {
