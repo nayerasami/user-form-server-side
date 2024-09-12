@@ -7,9 +7,9 @@ module.exports.getAllPermissions = async (req, res, next) => {
   res.status(200).json({ status: "success", data: { permissions } });
 };
 
-module.exports.getPermissionByPK = async (req, res, next) => {
+module.exports.getOnePermission = async (req, res, next) => {
   const { id } = req.params;
-  const permission = await Permissions.findByPK(id);
+  const permission = await Permissions.findOne({where:{id}});
   if (!permission) {
     return next(new ApiError("permission is not found", 404));
   }

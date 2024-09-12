@@ -8,10 +8,10 @@ module.exports.getAllUsers = async (req, res, next) => {
   res.status(200).json({ status: "success", data: { users } });
 };
 
-module.exports.getUserByPK = async (req, res, next) => {
+module.exports.getOneUser = async (req, res, next) => {
   const { id } = req.params;
 
-  const user = await User.findByPK(id);
+  const user = await User.findOne({ where: { id }, include: Countries });
   if (!user) {
     return next(new ApiError("user is not found", 404));
   }
@@ -29,10 +29,7 @@ module.exports.updateUser = async (req, res, next) => {
   const updatedData = req.body;
   const { id } = req.params;
 
-  const updatedUser = await User.update(
-    updatedData,
-    { where: { id } }
-  );
+  const updatedUser = await User.update(updatedData, { where: { id } });
   if (!updatedUser) {
     return next(new ApiError("user is not found", 404));
   }

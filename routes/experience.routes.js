@@ -10,7 +10,7 @@ experienceRouter.route('/')
 .post(asyncHandler(createExperience))
 
 
-experienceRouter.route('/:id')
+experienceRouter.route('/:userId/:id')
 .get(asyncHandler(getOneExperience))
 .put(asyncHandler(updateExperience))
 .delete(asyncHandler(deleteExperience))

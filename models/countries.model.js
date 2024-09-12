@@ -1,6 +1,5 @@
 const sequelize = require("../config/db.config");
 const { DataTypes } = require("sequelize");
-
 const Countries = sequelize.define("countries", {
   id: {
     type: DataTypes.INTEGER,
@@ -17,5 +16,7 @@ const Countries = sequelize.define("countries", {
     allowNull: false,
   },
 });
+
+
 
 module.exports = Countries;

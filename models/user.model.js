@@ -2,6 +2,7 @@ const sequelize = require("../config/db.config");
 const { DataTypes } = require("sequelize");
 const Countries = require("./countries.model");
 
+
 const User = sequelize.define("user", {
   id: {
     type: DataTypes.INTEGER,
@@ -96,5 +97,7 @@ const User = sequelize.define("user", {
     allowNull: false,
   },
 });
+
+
 
 module.exports = User;

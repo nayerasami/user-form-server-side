@@ -1,6 +1,11 @@
 const express =require('express')
 const dotenv =require('dotenv')
 const bootstrap =require('./routes/index.route')
+require('./models/user.model')
+require('./models/experience.model')
+require('./models/countries.model')
+require('./models/permissions.model')
+require('./models/accossiation');
 
 
 dotenv.config()

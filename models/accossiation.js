@@ -14,6 +14,9 @@ User.belongsTo(Countries,{ foreignKey: 'phoneKey' })
 User.belongsToMany(Permissions,{
     through:'user_permissions'
 })
-Permissions,belongsToMany(User,{
+Permissions.belongsToMany(User,{
      through:'user_permissions'
 })
+
+
+module.exports = { User, Experience, Permissions, Countries };

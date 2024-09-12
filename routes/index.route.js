@@ -6,6 +6,11 @@ const userRouter =require('./user.routes.js');
 const countriesRouter =require('./countries.routes.js');
 const permissionsRouter =require('./permission.routes.js');
 const experienceRouter =require('./experience.routes.js');
+require('../models/user.model.js')
+require('../models/experience.model')
+require('../models/countries.model')
+require('../models/permissions.model')
+require('../models/accossiation');
 
 
 const bootstrap = (app, express) => {
