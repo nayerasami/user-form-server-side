@@ -3,7 +3,12 @@ const User = require("../models/user.model");
 const ApiError = require("../utilities/ErrorClass");
 
 module.exports.getAllUsers = async (req, res, next) => {
-  const users = await User.findAll({});
+  const users = await User.findAll({attributes: {
+    exclude: ['phoneKey'], 
+  },include: {
+    model:Countries,
+     attributes: ['countryKey']
+    } });
 
   res.status(200).json({ status: "success", data: { users } });
 };
@@ -11,7 +16,12 @@ module.exports.getAllUsers = async (req, res, next) => {
 module.exports.getOneUser = async (req, res, next) => {
   const { id } = req.params;
 
-  const user = await User.findOne({ where: { id }, include: Countries });
+  const user = await User.findOne({ where: { id }, attributes: {
+    exclude: ['phoneKey'], 
+  },include: {
+    model:Countries,
+     attributes: ['countryKey']
+    } });
   if (!user) {
     return next(new ApiError("user is not found", 404));
   }
