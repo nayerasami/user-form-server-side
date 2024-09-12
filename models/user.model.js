@@ -44,7 +44,7 @@ const User = sequelize.define("user", {
     allowNull: false,
     unique: true,
     validate: {
-      is: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$$/i,
+      is: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
     },
   },
   phoneKey: {
@@ -73,6 +73,15 @@ const User = sequelize.define("user", {
   birthDate: {
     type: DataTypes.DATE,
     allowNull: false,
+    validate: {
+      isDateInThePast(value) {
+        const currentDate = new Date();
+        const selectedDate = value;
+        if (selectedDate >= currentDate) {
+          throw new Error("Date Must Be in the past");
+        }
+      },
+    },
   },
   addressAr: {
     type: DataTypes.STRING,

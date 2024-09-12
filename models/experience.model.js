@@ -22,7 +22,7 @@ const Experience = sequelize.define("experience", {
     primaryKey: true,
     validate: {
       isDateInThePast(value) {
-        const currentDate = Date.now();
+        const currentDate = new Date();
         const selectedDate = value;
         if (selectedDate >= currentDate) {
           throw new Error("Date Must Be in the past");
@@ -35,7 +35,7 @@ const Experience = sequelize.define("experience", {
     allowNull: true,
     validate: {
       isDateInThePast(value) {
-        const currentDate = Date.now();
+        const currentDate =new Date();
         const selectedDate = value;
         if (selectedDate >= currentDate) {
           throw new Error("Date Must Be in the past");

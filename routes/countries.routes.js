@@ -7,17 +7,20 @@ const {
   deleteCountry,
   updateCountry,
 } = require("../controllers/countries.controller");
+const {validation }=require('../middlewares/validations/validation');
+const { validateAddCountry, validateEditCountry } = require("../middlewares/validations/countries.validation");
+
 const countriesRouter = express.Router();
 
 countriesRouter
   .route("/")
   .get(asyncHandler(getAllCountries))
-  .post(asyncHandler(addNewCountry));
+  .post(validation(validateAddCountry),asyncHandler(addNewCountry));
 
 countriesRouter
   .route("/:id")
   .get(asyncHandler(getCountryByPK))
   .delete(asyncHandler(deleteCountry))
-  .put(asyncHandler(updateCountry));
+  .put(validation(validateEditCountry),asyncHandler(updateCountry));
 
 module.exports = countriesRouter;

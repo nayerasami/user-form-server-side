@@ -37,9 +37,13 @@ module.exports.getOneUser = async (req, res, next) => {
 
 module.exports.createUser = async (req, res, next) => {
   const createdData = req.body;
-  const { email, nationalID, phoneNumber } = req.body;
+  const { email, nationalID, phoneNumber ,phoneKey} = req.body;
   const existedUserEmail = await User.findOne({ where: { email } });
 
+  const country =Countries.findOne({where:{id:phoneKey}})
+  if(!country){
+    return next(new ApiError('country key is not found',404))
+  }
   if (existedUserEmail) {
     return next(new ApiError("this user email already exist", 409));
   }
