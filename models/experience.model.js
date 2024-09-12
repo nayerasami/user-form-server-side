@@ -10,6 +10,7 @@ const Experience = sequelize.define("experience", {
       key: "id",
     },
     primaryKey: true,
+    allowNull:false
   },
   companyName: {
     type: DataTypes.STRING,

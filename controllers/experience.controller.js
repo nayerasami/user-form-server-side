@@ -1,5 +1,6 @@
 const Experience = require("../models/experience.model");
 const ApiError = require("../utilities/ErrorClass");
+const User =require('../models/user.model')
 
 module.exports.getAllExperience = async (req, res, next) => {
   const experiences = await Experience.findAll({});
@@ -12,7 +13,7 @@ module.exports.getOneExperience = async (req, res, next) => {
   const experience = await Experience.findOne({
     where: {
       startDate: new Date(id),
-      user_id:userId,
+      user_id: userId,
     },
   });
 
@@ -23,26 +24,37 @@ module.exports.getOneExperience = async (req, res, next) => {
 };
 
 module.exports.createExperience = async (req, res, next) => {
-  const createdData = req.body;
-
-  const experience = await Experience.create(createdData);
+  const { user_id,startDate,companyName,endDate,currentlyWorking} = req.body;
+  const userExists = await User.findOne({ where: { id: user_id } });
+    
+  if (!userExists) {
+    return next(new ApiError("User not found", 404));
+  }
+  const experience = await Experience.create( { user_id,startDate,companyName,endDate,currentlyWorking} );
 
   res.status(201).json({ status: "success", data: { experience } });
 };
 
 module.exports.updateExperience = async (req, res, next) => {
-  const  updatedData  = req.body;
+  const updatedData = req.body;
   const { userId, id } = req.params;
 
-  const updatedExperience = await Experience.update(updatedData, {
+  const [affectedRows] = await Experience.update(updatedData, {
     where: {
       startDate: new Date(id),
-      user_id:userId,
+      user_id: userId,
     },
   });
-  if (updatedExperience.affectedRows == 0) {
+  console.log(affectedRows,"affected rows")
+  if (affectedRows === 0) {
     return next(new ApiError("experience is not found", 404));
   }
+  const updatedExperience = await Experience.findOne({
+    where: {
+      startDate: new Date(id),
+      user_id: userId,
+    },
+  });
   res.status(200).json({ status: "success", data: { updatedExperience } });
 };
 
@@ -51,10 +63,10 @@ module.exports.deleteExperience = async (req, res, next) => {
   const deletedExperience = await Experience.destroy({
     where: {
       startDate: new Date(id),
-      user_id:userId,
+      user_id: userId,
     },
   });
-  if (!deletedExperience) {
+  if (deletedExperience === 0) {
     return next(new ApiError("experience is not found", 404));
   }
   res.status(200).json({ status: "success", data: null });

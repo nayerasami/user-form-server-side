@@ -41,7 +41,7 @@ const bootstrap = (app, express) => {
   app.use(globalErrorHandling);
 
   sequelize
-    .sync({ force: true })
+    .sync({ alter: true })
     .then(() => {
       console.log("DB connection successfully ...");
     })

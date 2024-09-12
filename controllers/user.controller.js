@@ -3,12 +3,15 @@ const User = require("../models/user.model");
 const ApiError = require("../utilities/ErrorClass");
 
 module.exports.getAllUsers = async (req, res, next) => {
-  const users = await User.findAll({attributes: {
-    exclude: ['phoneKey'], 
-  },include: {
-    model:Countries,
-     attributes: ['countryKey']
-    } });
+  const users = await User.findAll({
+    attributes: {
+      exclude: ["phoneKey"],
+    },
+    include: {
+      model: Countries,
+      attributes: ["countryKey"],
+    },
+  });
 
   res.status(200).json({ status: "success", data: { users } });
 };
@@ -16,12 +19,16 @@ module.exports.getAllUsers = async (req, res, next) => {
 module.exports.getOneUser = async (req, res, next) => {
   const { id } = req.params;
 
-  const user = await User.findOne({ where: { id }, attributes: {
-    exclude: ['phoneKey'], 
-  },include: {
-    model:Countries,
-     attributes: ['countryKey']
-    } });
+  const user = await User.findOne({
+    where: { id },
+    attributes: {
+      exclude: ["phoneKey"],
+    },
+    include: {
+      model: Countries,
+      attributes: ["countryKey"],
+    },
+  });
   if (!user) {
     return next(new ApiError("user is not found", 404));
   }
@@ -30,6 +37,24 @@ module.exports.getOneUser = async (req, res, next) => {
 
 module.exports.createUser = async (req, res, next) => {
   const createdData = req.body;
+  const { email, nationalID, phoneNumber } = req.body;
+  const existedUserEmail = await User.findOne({ where: { email } });
+
+  if (existedUserEmail) {
+    return next(new ApiError("this user email already exist", 409));
+  }
+
+  const existedUserPhone = await User.findOne({ where: { phoneNumber } });
+  if (existedUserPhone) {
+    return next(new ApiError("this user phone number already exist", 409));
+  }
+
+  const existedUserID = await User.findOne({ where: { nationalID } });
+
+  if (existedUserID) {
+    return next(new ApiError("this user national id already exist ", 409));
+  }
+
   const user = await User.create(createdData);
 
   res.status(201).json({ status: "success", data: { user } });
@@ -39,10 +64,11 @@ module.exports.updateUser = async (req, res, next) => {
   const updatedData = req.body;
   const { id } = req.params;
 
-  const updatedUser = await User.update(updatedData, { where: { id } });
-  if (!updatedUser) {
-    return next(new ApiError("user is not found", 404));
+  const [affectedRows] = await User.update(updatedData, { where: { id } });
+  if (affectedRows === 0) {
+    return next(new ApiError("user not found", 404));
   }
+  const updatedUser = await User.findOne({ where: { id } });
   res.status(200).json({ status: "success", data: { updatedUser } });
 };
 
@@ -50,8 +76,9 @@ module.exports.deleteUser = async (req, res, next) => {
   const { id } = req.params;
 
   const deletedUser = await User.destroy({ where: { id } });
-  if (!deletedUser) {
-    return next(new ApiError("user is not found", 404));
+  console.log(deletedUser,"deleted user")
+  if (deletedUser === 0) {
+    return next(new ApiError("user not found", 404));
   }
   res.status(200).json({ status: "success", data: null });
 };

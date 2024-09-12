@@ -17,22 +17,30 @@ module.exports.getOnePermission = async (req, res, next) => {
 };
 
 module.exports.createNewPermission = async (req, res, next) => {
-  const createdData = req.body;
+  const {permission} = req.body;
 
-  const permission = await Permissions.create(createdData);
-  res.status(201).json({ status: "success", data: { permission } });
+  const newPermission = await Permissions.create({permission});
+  const exitedPermission =await Permissions.findOne({where:{permission}})
+
+  if(exitedPermission){
+    return next(new ApiError('this permission already exist',409))
+  }
+  res.status(201).json({ status: "success", data: { newPermission } });
 };
 
 module.exports.updatePermission = async (req, res, next) => {
   const { id } = req.params;
   const updatedData = req.body;
 
-  const updatedPermission = await Permissions.update(updatedData, {
+  const [affectedRows] = await Permissions.update(updatedData, {
     where: { id },
   });
-  if (!updatedPermission) {
+  console.log(affectedRows,"affected rows")
+  if (affectedRows === 0) {
     return next(new ApiError("permission is not found", 404));
   }
+  const updatedPermission =await Permissions.findOne({where:{id}})
+
   res.status(200).json({ status: "success", data: { updatedPermission } });
 };
 
@@ -40,7 +48,7 @@ module.exports.deletePermission = async (req, res, next) => {
   const { id } = req.params;
 
   const deletedPermission = await Permissions.destroy({ where: { id } });
-  if (!deletedPermission) {
+  if (deletedPermission === 0) {
     return next(new ApiError("permission is not found", 404));
   }
   res.status(200).json({ status: "success", data: null });

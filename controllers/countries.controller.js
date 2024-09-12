@@ -17,28 +17,38 @@ module.exports.getCountryByPK = async (req, res, next) => {
 };
 
 module.exports.addNewCountry = async (req, res, next) => {
-  const newCountryData = req.body;
+  const { countryName, countryKey } = req.body;
 
-  const newCountry = await Countries.create(newCountryData);
+
+  const existedCountryName = await Countries.findOne({
+    where: { countryName },
+  });
+
+  if (existedCountryName) {
+    return next(new ApiError("this country name already exist ", 409));
+  }
+  const newCountry = await Countries.create({ countryName, countryKey });
+
   res.status(201).json({ status: "success", data: { newCountry } });
 };
 
 module.exports.updateCountry = async (req, res, next) => {
   const updatedData = req.body;
   const { id } = req.params;
+  const [affectedRows] = await Countries.update(updatedData, { where: { id } });
 
-  const updatedCountry = await Countries.update(updatedData, { where: { id } });
+    if (affectedRows === 0) {
+      return next(new ApiError("Country not found", 404));
+    }
+    const updatedCountry = await Countries.findOne({ where: { id } });
 
-  if (!updatedCountry) {
-    return next(new ApiError("country not found", 404));
-  }
   res.status(200).json({ status: "success", data: { updatedCountry } });
 };
 
 module.exports.deleteCountry = async (req, res, next) => {
   const { id } = req.params;
   const deletedCountry = await Countries.destroy({ where: { id } });
-  if (!deletedCountry) {
+  if (deletedCountry === 0) {
     return next(new ApiError("country not found", 404));
   }
   res.status(200).json({ status: "success", data: null });
