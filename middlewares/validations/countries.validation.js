@@ -7,6 +7,6 @@ module.exports.validateAddCountry = joi.object({
 
 module.exports.validateEditCountry = joi.object({
   id: joi.number().integer().positive().required(),
-  countryKey: joi.string().min(1).max(510).required().trim(),
-  countryName: joi.string().min(3).max(50).required().trim(),
+  countryKey: joi.string().min(2).max(510).optional().trim(),
+  countryName: joi.string().min(3).max(50).optional().trim(),
 });

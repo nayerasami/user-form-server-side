@@ -11,10 +11,14 @@ module.exports.validateAddExperience=joi.object({
         return value;
       }),
 
-      endDate:joi.date().optional().custom((value,helpers)=>{
+      endDate:joi.date().optional().custom((value,helpers,state)=>{
         const currentDate =new Date();
-        if(value >= currentDate){
-            return helpers.message("Start date must be in the past")
+        const { startDate } = state.ancestors[0]; 
+        if (value && value >= currentDate) {
+          return helpers.message("End date must be in the past");
+        }
+        if (value && startDate && value <= startDate) {
+          return helpers.message("End date must be after start date");
         }
         return value;
       }),
@@ -31,10 +35,14 @@ module.exports.validateEditExperience =joi.object({
         }
         return value;
       }),
-      endDate:joi.date().optional().custom((value,helpers)=>{
+      endDate:joi.date().optional().custom((value,helpers,state)=>{
         const currentDate =new Date();
-        if(value >= currentDate){
-            return helpers.message("end date must be in the past")
+        const { startDate } = state.ancestors[0]; 
+        if (value && value >= currentDate) {
+          return helpers.message("End date must be in the past");
+        }
+        if (value && startDate && value <= startDate) {
+          return helpers.message("End date must be after start date");
         }
         return value;
       }),

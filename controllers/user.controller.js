@@ -86,3 +86,16 @@ module.exports.deleteUser = async (req, res, next) => {
   }
   res.status(200).json({ status: "success", data: null });
 };
+
+module.exports.CheckEmail =async(req,res,next)=>{
+const { email }=req.query;
+
+const user =await User.findOne({where:{email}})
+if(user){
+  return next(new ApiError('this email already in use',409))
+}
+res.status(200).json({ message: 'Email is available' });
+
+}
+
+
