@@ -2,9 +2,26 @@ const Countries = require("../models/countries.model");
 const ApiError = require("../utilities/ErrorClass");
 
 module.exports.getAllCountries = async (req, res, next) => {
+  const page = req.query.page * 1 || 1;
+  const limit = req.query.limit * 1 || 10;
+  const search = req.query.search ? req.query.search.toLowerCase() : "";
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
   const countries = await Countries.findAll({});
+  let searchArray = countries;
 
-  res.status(200).json({ status: "success", data: { countries } });
+  const totalNumber = countries.length;
+  const numberOfPages = Math.ceil(totalNumber / limit);
+
+  if (search) {
+    searchArray = countries.filter((country) => {
+      return country.countryName.toLowerCase().includes(search);
+    });
+  }
+
+  const countriesArr = searchArray.slice(startIndex, endIndex);
+
+  res.status(200).json({ status: "success" , data: { totalNumber, page, numberOfPages, items: countriesArr }});
 };
 
 module.exports.getCountryByPK = async (req, res, next) => {
@@ -18,7 +35,6 @@ module.exports.getCountryByPK = async (req, res, next) => {
 
 module.exports.addNewCountry = async (req, res, next) => {
   const { countryName, countryKey } = req.body;
-
 
   const existedCountryName = await Countries.findOne({
     where: { countryName },
@@ -37,10 +53,10 @@ module.exports.updateCountry = async (req, res, next) => {
   const { id } = req.params;
   const [affectedRows] = await Countries.update(updatedData, { where: { id } });
 
-    if (affectedRows === 0) {
-      return next(new ApiError("Country not found", 404));
-    }
-    const updatedCountry = await Countries.findOne({ where: { id } });
+  if (affectedRows === 0) {
+    return next(new ApiError("Country not found", 404));
+  }
+  const updatedCountry = await Countries.findOne({ where: { id } });
 
   res.status(200).json({ status: "success", data: { updatedCountry } });
 };

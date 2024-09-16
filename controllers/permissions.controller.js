@@ -1,4 +1,5 @@
 const Permissions = require("../models/permissions.model");
+const User = require("../models/user.model");
 const ApiError = require("../utilities/ErrorClass");
 
 module.exports.getAllPermissions = async (req, res, next) => {
@@ -53,3 +54,19 @@ module.exports.deletePermission = async (req, res, next) => {
   }
   res.status(200).json({ status: "success", data: null });
 };
+
+module.exports.addUserPermission =async(req,res,next)=>{
+const {userId , permissionId}=req.body;
+const user=await User.findOne({where:{id:userId}})
+if (!user) {
+  return next(new ApiError('user not found'))
+}
+const permission =await Permissions.findOne({where:{id:permissionId}})
+
+if (!permission) {
+  return next(new ApiError('permission not found'))
+}
+await user.addPermission(permission);
+
+
+}
