@@ -88,14 +88,38 @@ module.exports.deleteUser = async (req, res, next) => {
 };
 
 module.exports.CheckEmail =async(req,res,next)=>{
+  console.log('Check-email route hit');
 const { email }=req.query;
 
 const user =await User.findOne({where:{email}})
 if(user){
-  return next(new ApiError('this email already in use',409))
+ res.status(200).json({exist:true})
 }
-res.status(200).json({ message: 'Email is available' });
+
+res.status(200).json({exist:false});
 
 }
 
+module.exports.checkNationalID =async(req,res,next)=>{
+
+ const{nationalID}=req.query
+
+ const user =await User.findOne({where:{nationalID}})
+ if(user){
+  res.status(200).json({exist:true})
+ }
+ res.status(200).json({exist:false})
+}
+
+
+module.exports.checkPhone =async(req,res,next)=>{
+
+  const {phoneNumber}= req.query
+
+  const user =await User.findOne({where:{phoneNumber}})
+  if(user){
+    res.status(200).json({exist:true})
+  }
+  res.status(200).json({exist:false})
+}
 
