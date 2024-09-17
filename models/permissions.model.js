@@ -13,7 +13,8 @@ const Permissions = sequelize.define("permissions", {
     allowNull: false,
   },
   
-});
+} , { timestamps: false }
+);
 
 
 

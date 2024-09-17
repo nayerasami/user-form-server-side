@@ -2,6 +2,7 @@ const User =require('./user.model');
 const Experience =require('./experience.model');
 const Permissions =require('./permissions.model');
 const Countries =require('./countries.model');
+//const userPermissions = require('./user_permissions');
 
 
 User.hasMany(Experience,{foreignKey:'user_id'})

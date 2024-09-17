@@ -1,6 +1,6 @@
 const express =require('express');
 const asyncHandler =require('express-async-handler');
-const { getAllPermissions, createNewPermission, getOnePermission ,updatePermission ,deletePermission, addUserPermission } = require('../controllers/permissions.controller');
+const { getAllPermissions, createNewPermission, getOnePermission ,updatePermission ,deletePermission, addUserPermission, getAllUserPermissions } = require('../controllers/permissions.controller');
 const {validation }=require('../middlewares/validations/validation');
 const { validateAddPermission, validateEditPermission } = require('../middlewares/validations/permissions.validation');
 
@@ -8,6 +8,7 @@ const { validateAddPermission, validateEditPermission } = require('../middleware
 const permissionsRouter =express.Router()
 
 permissionsRouter.route('/user-permission').post(asyncHandler(addUserPermission))
+//.get(asyncHandler(getAllUserPermissions))
 
 permissionsRouter.route('/')
 .get(asyncHandler(getAllPermissions))
