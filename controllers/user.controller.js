@@ -76,7 +76,7 @@ module.exports.createUser = async (req, res, next) => {
     permissions,
   } = req.body;
 
-  console.log(permissions, "permissions array")
+  console.log(permissions, "permissions array");
   if (!email) {
     return next(new ApiError("Email is required", 400));
   }
@@ -136,7 +136,7 @@ module.exports.createUser = async (req, res, next) => {
       {
         include: [
           { model: Countries, attributes: ["countryKey"] },
-          { model: Experience, as: 'userExperience' },
+          { model: Experience, as: "userExperience" },
         ],
         transaction,
       }
@@ -146,19 +146,21 @@ module.exports.createUser = async (req, res, next) => {
       return next(new ApiError("User creation failed", 500));
     }
 
-
-    const existedPermission = await Permissions.findOne({ where: { id: permissions.permissionId } });
+    if (!permissions) {
+      return next(new ApiError("Permission is required", 400));
+    }
+    const existedPermission = await Permissions.findOne({
+      where: { id: permissions.permissionId },
+    });
     if (!existedPermission) {
       return next(new ApiError("permission is not found", 404));
     }
 
-    console.log(existedPermission, "existed permission ")
+    console.log(existedPermission, "existed permission ");
 
-
-      const userPermission = await user.addPermissions(existedPermission, {
-        transaction,
-      });
-   
+    const userPermission = await user.addPermissions(existedPermission, {
+      transaction,
+    });
 
     await transaction.commit();
 
