@@ -13,7 +13,7 @@ userRouter.route('/check-national-id').get(asyncHandler(checkNationalID))
 
 userRouter.route("/")
 .get(asyncHandler(getAllUsers))
-.post(validation(validateAddUser),asyncHandler(createUser));
+.post(asyncHandler(createUser));
 
 userRouter.route("/:id")
 .get(asyncHandler(getOneUser))

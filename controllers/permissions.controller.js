@@ -21,12 +21,11 @@ module.exports.getOnePermission = async (req, res, next) => {
 module.exports.createNewPermission = async (req, res, next) => {
   const {permission} = req.body;
 
-  const newPermission = await Permissions.create({permission});
   const exitedPermission =await Permissions.findOne({where:{permission}})
-
   if(exitedPermission){
     return next(new ApiError('this permission already exist',409))
   }
+  const newPermission = await Permissions.create({permission});
   res.status(201).json({ status: "success", data: { newPermission } });
 };
 

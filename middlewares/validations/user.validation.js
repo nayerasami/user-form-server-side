@@ -25,9 +25,26 @@ module.exports.validateAddUser = joi.object({
       addressAr:joi.string().required().min(8).max(150).pattern(/^[\u0600-\u06FF\s]+$/u).trim(),
       addressEN:joi.string().required().min(8).max(150).pattern(/^[a-zA-Z\s]+$/i).trim(),
       gender: joi.string().valid(...gender).required().min(2).trim(),
-      maritalStatus: joi.string().valid(...maritalStatus).required().min(2).trim()
+      maritalStatus: joi.string().valid(...maritalStatus).required().min(2).trim(),
+      userExperience: joi.array().items(
+        joi.object({
+            companyName: joi.string().required().min(2).trim(),
+            startDate: joi.date().required(),
+            endDate: joi.date().optional(),
+            currentlyWorking: joi.boolean().optional(),
+          
+        })
+    ).required(),
+    permissions: joi.array().items(
+        joi.object({
+            id: joi.number().integer().positive().required(),
+            permission: joi.string().required().min(2).trim()
+        })
+    ).required()
+
 
 })
+
 
 
 module.exports.validateEditUser =joi.object({

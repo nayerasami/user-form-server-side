@@ -15,7 +15,7 @@ const Countries = sequelize.define("countries", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-});
+}, { timestamps: false });
 
 
 

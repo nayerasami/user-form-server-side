@@ -5,7 +5,8 @@ require('./models/user.model')
 require('./models/experience.model')
 require('./models/countries.model')
 require('./models/permissions.model')
-require('./models/accossiation');
+require('./models/user_permissions')
+require('./models/association');
 
 
 dotenv.config()

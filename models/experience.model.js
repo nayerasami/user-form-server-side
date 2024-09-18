@@ -52,7 +52,7 @@ const Experience = sequelize.define("experience", {
     type: DataTypes.BOOLEAN,
     allowNull: true,
   },
-});
+}, { timestamps: false });
 
 
 module.exports = Experience;

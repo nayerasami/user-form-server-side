@@ -45,6 +45,7 @@ module.exports.addNewCountry = async (req, res, next) => {
   }
   const newCountry = await Countries.create({ countryName, countryKey });
 
+  
   res.status(201).json({ status: "success", data: { newCountry } });
 };
 
