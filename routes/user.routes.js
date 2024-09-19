@@ -17,7 +17,7 @@ userRouter.route("/")
 
 userRouter.route("/:id")
 .get(asyncHandler(getOneUser))
-.put(validation(validateEditUser),asyncHandler(updateUser))
+.put(asyncHandler(updateUser))
 .delete(asyncHandler(deleteUser));
 
 

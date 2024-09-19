@@ -141,7 +141,6 @@ module.exports.createUser = async (req, res, next) => {
         transaction,
       }
     );
-
     if (!user) {
       return next(new ApiError("User creation failed", 500));
     }
@@ -149,18 +148,28 @@ module.exports.createUser = async (req, res, next) => {
     if (!permissions) {
       return next(new ApiError("Permission is required", 400));
     }
-    const existedPermission = await Permissions.findOne({
-      where: { id: permissions.permissionId },
-    });
-    if (!existedPermission) {
-      return next(new ApiError("permission is not found", 404));
+
+    for (const permission of permissions) {
+      const existedPermission = await Permissions.findOne({
+        where: { id: permission.permissionId },
+        transaction,
+      });
+
+      if (!existedPermission) {
+        return next(
+          new ApiError(
+            `Permission with ID ${permission.permissionId} not found`,
+            404
+          )
+        );
+      }
+
+      console.log(existedPermission, "existed permission ");
+
+      await user.addPermissions(existedPermission, {
+        transaction,
+      });
     }
-
-    console.log(existedPermission, "existed permission ");
-
-    const userPermission = await user.addPermissions(existedPermission, {
-      transaction,
-    });
 
     await transaction.commit();
 
@@ -172,15 +181,99 @@ module.exports.createUser = async (req, res, next) => {
 };
 
 module.exports.updateUser = async (req, res, next) => {
-  const updatedData = req.body;
+  const {
+    firstNameAR,
+    lastNameAR,
+    firstNameEN,
+    lastNameEN,
+    email,
+    phoneKey,
+    phoneNumber,
+    nationalID,
+    birthDate,
+    addressAr,
+    addressEN,
+    gender,
+    maritalStatus,
+    userExperience,
+    permissions,
+  } = req.body;
   const { id } = req.params;
 
-  const [affectedRows] = await User.update(updatedData, { where: { id } });
-  if (affectedRows === 0) {
-    return next(new ApiError("user not found", 404));
+  const transaction = await sequelize.transaction();
+
+  try {
+    const user = await User.findOne({ where: { id }, transaction });
+    console.log(user, "user data");
+    if (!user) {
+      return next(new ApiError("User not found", 404));
+    }
+
+    await user.update(
+      {
+        firstNameAR,
+        lastNameAR,
+        firstNameEN,
+        lastNameEN,
+        email,
+        phoneKey,
+        phoneNumber,
+        nationalID,
+        birthDate,
+        addressAr,
+        addressEN,
+        gender,
+        maritalStatus,
+      },
+      { transaction }
+    );
+
+    if (userExperience) {
+      await Experience.destroy({
+        where: { user_id: id },
+        transaction,
+      });
+
+      for (const experience of userExperience) {
+        const addedExperience = await Experience.create(
+          {
+            user_id: id,
+            ...experience,
+          },
+          { transaction }
+        );
+
+        await user.addUserExperience(addedExperience, { transaction });
+      }
+    }
+
+    if (permissions) {
+      await user.setPermissions([], { transaction });
+
+      for (const permission of permissions) {
+        const existedPermission = await Permissions.findOne({
+          where: { id: permission.permissionId },
+          transaction,
+        });
+        if (!existedPermission) {
+          return next(
+            new ApiError(
+              `Permission with ID ${permission.permissionId} not found`,
+              404
+            )
+          );
+        }
+        await user.addPermissions(existedPermission, { transaction });
+      }
+    }
+
+    await transaction.commit();
+
+    res.status(200).json({ status: "success", data: { user } });
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
   }
-  const updatedUser = await User.findOne({ where: { id } });
-  res.status(200).json({ status: "success", data: { updatedUser } });
 };
 
 module.exports.deleteUser = async (req, res, next) => {
