@@ -34,9 +34,6 @@ module.exports.getOneUser = async (req, res, next) => {
 
   const user = await User.findOne({
     where: { id },
-    attributes: {
-      exclude: ["phoneKey"],
-    },
     include: [
       {
         model: Countries,
@@ -86,7 +83,6 @@ module.exports.createUser = async (req, res, next) => {
   try {
     const existedUserEmail = await User.findOne({
       where: { email },
-      transaction,
     });
     if (existedUserEmail) {
       return next(new ApiError("This user email already exists", 409));
@@ -99,10 +95,12 @@ module.exports.createUser = async (req, res, next) => {
     if (!country) {
       return next(new ApiError("Country key is not found", 404));
     }
-
+    if (!permissions) {
+      return next(new ApiError("Permission is required", 400));
+    }
     const existedUserPhone = await User.findOne({
       where: { phoneNumber },
-      transaction,
+   
     });
     if (existedUserPhone) {
       return next(new ApiError("This user phone number already exists", 409));
@@ -110,7 +108,6 @@ module.exports.createUser = async (req, res, next) => {
 
     const existedUserID = await User.findOne({
       where: { nationalID },
-      transaction,
     });
     if (existedUserID) {
       return next(new ApiError("This user national ID already exists", 409));
@@ -145,9 +142,7 @@ module.exports.createUser = async (req, res, next) => {
       return next(new ApiError("User creation failed", 500));
     }
 
-    if (!permissions) {
-      return next(new ApiError("Permission is required", 400));
-    }
+
 
     for (const permission of permissions) {
       const existedPermission = await Permissions.findOne({
@@ -228,6 +223,7 @@ module.exports.updateUser = async (req, res, next) => {
       { transaction }
     );
 
+    
     if (userExperience) {
       await Experience.destroy({
         where: { user_id: id },
