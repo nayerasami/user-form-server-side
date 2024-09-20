@@ -11,7 +11,7 @@ experienceRouter.route('/')
 .post(validation(validateAddExperience),asyncHandler(createExperience))
 
 
-experienceRouter.route('/:userId/:id')
+experienceRouter.route('/:id/:userId')
 .get(asyncHandler(getOneExperience))
 .put(validation(validateEditExperience),asyncHandler(updateExperience))
 .delete(asyncHandler(deleteExperience))

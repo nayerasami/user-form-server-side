@@ -8,7 +8,6 @@ const Countries = sequelize.define("countries", {
   },
   countryKey: {
     type: DataTypes.STRING,
-    unique: true,
     allowNull: false,
   },
   countryName: {

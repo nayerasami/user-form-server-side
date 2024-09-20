@@ -2,10 +2,10 @@ const cors = require("cors");
 const sequelize = require("../config/db.config");
 const ApiError = require("../utilities/ErrorClass.js");
 const { globalErrorHandling } = require("../utilities/globalErrorHandling");
-const userRouter =require('./user.routes.js');
-const countriesRouter =require('./countries.routes.js');
-const permissionsRouter =require('./permission.routes.js');
-const experienceRouter =require('./experience.routes.js');
+const userRouter = require('./user.routes.js');
+const countriesRouter = require('./countries.routes.js');
+const permissionsRouter = require('./permission.routes.js');
+const experienceRouter = require('./experience.routes.js');
 require('../models/user.model.js')
 require('../models/experience.model')
 require('../models/countries.model')
@@ -26,14 +26,14 @@ const bootstrap = (app, express) => {
   app.get("/", (req, res) => {
     res.send("OUR API V3");
   });
- // Routing set up
+  // Routing set up
 
- app.use("/api/v1/users",userRouter );
- app.use("/api/v1/countries",countriesRouter );
- app.use("/api/v1/permissions", permissionsRouter );
- app.use("/api/v1/experience", experienceRouter );
+  app.use("/api/v1/users", userRouter);
+  app.use("/api/v1/countries", countriesRouter);
+  app.use("/api/v1/permissions", permissionsRouter);
+  app.use("/api/v1/experience", experienceRouter);
 
- 
+
   app.use("*", (req, res, next) => {
     next(new ApiError(`In-valid Routing: ${req.originalUrl}`, 400));
   });

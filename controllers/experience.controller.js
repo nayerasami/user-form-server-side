@@ -12,7 +12,7 @@ module.exports.getOneExperience = async (req, res, next) => {
   const { userId, id } = req.params;
   const experience = await Experience.findOne({
     where: {
-      startDate: new Date(id),
+      id,
       user_id: userId,
     },
   });
@@ -41,7 +41,7 @@ module.exports.updateExperience = async (req, res, next) => {
 
   const [affectedRows] = await Experience.update(updatedData, {
     where: {
-      startDate: new Date(id),
+      id,
       user_id: userId,
     },
   });
@@ -51,7 +51,7 @@ module.exports.updateExperience = async (req, res, next) => {
   }
   const updatedExperience = await Experience.findOne({
     where: {
-      startDate: new Date(id),
+      id,
       user_id: userId,
     },
   });
@@ -62,7 +62,7 @@ module.exports.deleteExperience = async (req, res, next) => {
   const { userId, id } = req.params;
   const deletedExperience = await Experience.destroy({
     where: {
-      startDate: new Date(id),
+      id,
       user_id: userId,
     },
   });
