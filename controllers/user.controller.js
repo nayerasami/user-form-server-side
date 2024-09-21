@@ -1,4 +1,5 @@
 const sequelize = require("../config/db.config");
+const { Op, where } = require("sequelize");
 const Countries = require("../models/countries.model");
 const Experience = require("../models/experience.model");
 const Permissions = require("../models/permissions.model");
@@ -140,15 +141,12 @@ module.exports.createUser = async (req, res, next) => {
       return next(new ApiError("User creation failed", 500));
     }
 
-    // const userPermissionsArr = []
-    // permissions.map((permission) => {
-    //   const permissionObj = { userId: user.id, permissionId: permission.permissionId }
-    //   userPermissionsArr.push(permissionObj)
-    // })
-    // const addedUserPermissions = await UserPermissions.bulkCreate(userPermissionsArr, { transaction })
-
     if (permissions && permissions.length) {
-      await user.addPermissions(permissions.map(p => p.permissionId), { transaction });
+      const userPermissionsArr = permissions.map((permission) => {
+        return { userId: user.id, permissionId: permission.permissionId };
+      });
+      const addedUserPermissions = await UserPermissions.bulkCreate(userPermissionsArr, { transaction });
+
     }
 
     await transaction.commit();
@@ -196,27 +194,27 @@ module.exports.updateUser = async (req, res, next) => {
   const { id } = req.params;
 
   const transaction = await sequelize.transaction();
-
   try {
     const user = await User.findOne({ where: { id }, transaction });
     console.log(user, "user data");
     if (!user) {
       return next(new ApiError("User not found", 404));
     }
-
     await user.update(
       userData,
       { transaction }
     );
-  
+
     if (userExperience) {
       const existingExperiences = await user.getUserExperience({ transaction });
+      console.log(existingExperiences,"existing Experiences")
       const existingExpIds = existingExperiences.map(exp => exp.id);
+      console.log(existingExpIds,"existing user ids arr")
       await Promise.all(userExperience.map(async (exp, index) => {
         if (existingExpIds[index]) {
           await existingExperiences[index].update({ 
             ...exp, 
-            user_id: user.id 
+            user_id: id 
           }, { transaction });
         } else {
           await Experience.create({
@@ -227,10 +225,12 @@ module.exports.updateUser = async (req, res, next) => {
       }));
     }
 
-
     if (permissions && permissions.length) {
+      // const userPermissionsArr = permissions.map(permission => permission.permissionId);
+      // await user.setPermissions(userPermissionsArr, { transaction });
       await user.setPermissions(permissions.map(p => p.permissionId), { transaction });
     }
+    
     await transaction.commit();
 
     res.status(200).json({ status: "success", data: { user } });
