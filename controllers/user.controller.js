@@ -38,7 +38,7 @@ module.exports.getOneUser = async (req, res, next) => {
     include: [
       {
         model: Countries,
-        attributes: ["countryKey"],
+        attributes: ["countryKey","countryName"],
       },
       {
         model: Permissions,
