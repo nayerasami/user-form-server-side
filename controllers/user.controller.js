@@ -205,26 +205,44 @@ module.exports.updateUser = async (req, res, next) => {
       { transaction }
     );
 
-    if (userExperience) {
-      const existingExperiences = await user.getUserExperience({ transaction });
-      console.log(existingExperiences,"existing Experiences")
-      const existingExpIds = existingExperiences.map(exp => exp.id);
-      console.log(existingExpIds,"existing user ids arr")
-      await Promise.all(userExperience.map(async (exp, index) => {
-        if (existingExpIds[index]) {
-          await existingExperiences[index].update({ 
-            ...exp, 
-            user_id: id 
-          }, { transaction });
-        } else {
-          await Experience.create({
-            ...exp,
-            user_id: user.id,
-          }, { transaction });
-        }
-      }));
-    }
+    // if (userExperience) {
+     
+    //   const existingExperiences = await user.getUserExperience({ transaction });
+    //   const existingExpStartDates = existingExperiences.map(exp => new Date(exp.startDate).toISOString().split('T')[0]);
+    //   const userExperienceStartDate = userExperience.map(exp => new Date(exp.startDate).toISOString().split('T')[0]);
+  
+    //   const hasMatch = existingExpStartDates.some(date => userExperienceStartDate.includes(date));
 
+    //   Promise.all(userExperience.map(async (exp) => {
+    //     if (hasMatch) {
+    //             await Experience.update(exp, { 
+    //             where: {
+    //             startDate: new Date(exp.startDate),
+    //              user_id: id,
+    //                }
+    //              , transaction });
+            
+    //     } else {
+    //         await Experience.create({
+    //             ...exp,
+    //             user_id: id,
+    //         }, { transaction });
+    //     }
+    // }));
+    // }
+
+
+    if (userExperience) {
+      await Experience.destroy({
+        where: { user_id: id },
+        transaction,
+      });
+
+      const userExperiencesArr= userExperience.map((exp)=>{return { user_id: id, ...exp }})
+      
+      const addedExperience =await Experience.bulkCreate(userExperiencesArr ,{transaction})
+    }
+    
     if (permissions && permissions.length) {
       // const userPermissionsArr = permissions.map(permission => permission.permissionId);
       // await user.setPermissions(userPermissionsArr, { transaction });

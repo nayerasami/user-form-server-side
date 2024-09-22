@@ -26,7 +26,6 @@ module.exports.validateAddExperience=joi.object({
 })
 
 module.exports.validateEditExperience =joi.object({
-    user_id:joi.number().integer().positive().required(),
     companyName:joi.string().required().trim(),
     startDate:joi.date().required().custom((value,helpers)=>{
         const currentDate =new Date();

@@ -8,12 +8,12 @@ const { validateAddExperience, validateEditExperience } = require('../middleware
 
 experienceRouter.route('/')
 .get(asyncHandler(getAllExperience))
-.post(validation(validateAddExperience),asyncHandler(createExperience))
+.post(asyncHandler(createExperience))
 
 
 experienceRouter.route('/:id/:userId')
 .get(asyncHandler(getOneExperience))
-.put(validation(validateEditExperience),asyncHandler(updateExperience))
+.put(asyncHandler(updateExperience))
 .delete(asyncHandler(deleteExperience))
 
 module.exports =experienceRouter
