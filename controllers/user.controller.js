@@ -38,7 +38,7 @@ module.exports.getOneUser = async (req, res, next) => {
     include: [
       {
         model: Countries,
-        attributes: ["countryKey","countryName"],
+        attributes: ["countryKey", "countryName"],
       },
       {
         model: Permissions,
@@ -89,9 +89,9 @@ module.exports.createUser = async (req, res, next) => {
     gender,
     maritalStatus,
     userExperience,
-  }
+  };
   if (!userExperience) {
-    return next(new ApiError('User Experience is required', 400))
+    return next(new ApiError("User Experience is required", 400));
   }
   if (!permissions) {
     return next(new ApiError("Permission is required", 400));
@@ -101,11 +101,7 @@ module.exports.createUser = async (req, res, next) => {
   try {
     const existingUser = await User.findOne({
       where: {
-        [Op.or]: [
-          { email },
-          { phoneNumber },
-          { nationalID }
-        ],
+        [Op.or]: [{ email }, { phoneNumber }, { nationalID }],
       },
     });
 
@@ -126,17 +122,13 @@ module.exports.createUser = async (req, res, next) => {
       return next(new ApiError("Country key is not found", 404));
     }
 
-
-    const user = await User.create(
-      userData,
-      {
-        include: [
-          { model: Countries, attributes: ["countryKey"] },
-          { model: Experience, as: "userExperience" },
-        ],
-        transaction,
-      }
-    );
+    const user = await User.create(userData, {
+      include: [
+        { model: Countries, attributes: ["countryKey"] },
+        { model: Experience, as: "userExperience" },
+      ],
+      transaction,
+    });
     if (!user) {
       return next(new ApiError("User creation failed", 500));
     }
@@ -145,8 +137,10 @@ module.exports.createUser = async (req, res, next) => {
       const userPermissionsArr = permissions.map((permission) => {
         return { userId: user.id, permissionId: permission.permissionId };
       });
-      const addedUserPermissions = await UserPermissions.bulkCreate(userPermissionsArr, { transaction });
-
+      const addedUserPermissions = await UserPermissions.bulkCreate(
+        userPermissionsArr,
+        { transaction }
+      );
     }
 
     await transaction.commit();
@@ -176,6 +170,7 @@ module.exports.updateUser = async (req, res, next) => {
     userExperience,
     permissions,
   } = req.body;
+
   const userData = {
     firstNameAR,
     lastNameAR,
@@ -189,8 +184,8 @@ module.exports.updateUser = async (req, res, next) => {
     addressAr,
     addressEN,
     gender,
-    maritalStatus
-  }
+    maritalStatus,
+  };
   const { id } = req.params;
 
   const transaction = await sequelize.transaction();
@@ -200,55 +195,59 @@ module.exports.updateUser = async (req, res, next) => {
     if (!user) {
       return next(new ApiError("User not found", 404));
     }
-    await user.update(
-      userData,
-      { transaction }
-    );
-
-    // if (userExperience) {
-     
-    //   const existingExperiences = await user.getUserExperience({ transaction });
-    //   const existingExpStartDates = existingExperiences.map(exp => new Date(exp.startDate).toISOString().split('T')[0]);
-    //   const userExperienceStartDate = userExperience.map(exp => new Date(exp.startDate).toISOString().split('T')[0]);
-  
-    //   const hasMatch = existingExpStartDates.some(date => userExperienceStartDate.includes(date));
-
-    //   Promise.all(userExperience.map(async (exp) => {
-    //     if (hasMatch) {
-    //             await Experience.update(exp, { 
-    //             where: {
-    //             startDate: new Date(exp.startDate),
-    //              user_id: id,
-    //                }
-    //              , transaction });
-            
-    //     } else {
-    //         await Experience.create({
-    //             ...exp,
-    //             user_id: id,
-    //         }, { transaction });
-    //     }
-    // }));
-    // }
-
+    await user.update(userData, { transaction });
 
     if (userExperience) {
-      await Experience.destroy({
-        where: { user_id: id },
-        transaction,
-      });
+      const existingExperiences = await user.getUserExperience({ transaction });
+      const existingExperiencesIDs = existingExperiences.map((exp) => exp.id);
+      const userExperienceIDs = userExperience.map((exp) => exp.id);
 
-      const userExperiencesArr= userExperience.map((exp)=>{return { user_id: id, ...exp }})
-      
-      const addedExperience =await Experience.bulkCreate(userExperiencesArr ,{transaction})
-    }
+      const idsToBeUpdated = existingExperiencesIDs.filter((el) =>
+        userExperienceIDs.includes(el)
+      );
+      const idsToBeDeleted = existingExperiencesIDs.filter((exp) => 
+        !idsToBeUpdated.includes(exp)
+      )
+
+      await Promise.all(
+        userExperience.map(async (exp) => {
+          if (exp.id) {
+            if (idsToBeUpdated.includes(exp.id)) {
+              await Experience.update(exp, {
+                where: {
+                  id: exp.id,
+                  user_id: user.id,
+                },
+                transaction,
+              });
+            }
+          } else if (exp.id === null) {
+            await Experience.create({ ...exp, user_id: user.id }, { transaction });
+          }
     
+          idsToBeDeleted.map(async(expId)=>{
+            await Experience.destroy({
+              where: {
+                id:expId,
+                user_id: id,
+              },
+              transaction
+            })
+          })
+        
+        })
+      );
+
+
+    }
+
     if (permissions && permissions.length) {
-      // const userPermissionsArr = permissions.map(permission => permission.permissionId);
-      // await user.setPermissions(userPermissionsArr, { transaction });
-      await user.setPermissions(permissions.map(p => p.permissionId), { transaction });
+      await user.setPermissions(
+        permissions.map((p) => p.permissionId),
+        { transaction }
+      );
     }
-    
+
     await transaction.commit();
 
     res.status(200).json({ status: "success", data: { user } });
