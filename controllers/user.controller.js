@@ -59,11 +59,11 @@ module.exports.createUser = async (req, res, next) => {
   const {
     userExperience,
     permissions,
-    phoneKey,
-    ...userData 
+    userInfo
+
   } = req.body;
 
-
+console.log(userInfo ,"user info ")
   if (!userExperience) {
     return next(new ApiError("User Experience is required", 400));
   }
@@ -75,32 +75,28 @@ module.exports.createUser = async (req, res, next) => {
   try {
     const existingUser = await User.findOne({
       where: {
-        [Op.or]: [
-          { email:userData.email }, 
-          {phoneNumber: userData.phoneNumber },
-          {nationalID: userData.nationalID }
-          ],
+        [Op.or]: [{ email :userInfo.email}, { phoneNumber:userInfo.phoneNumber }, { nationalID :userInfo.nationalID}],
       },
     });
 
     if (existingUser) {
-      if (existingUser.email === userData.email) {
+      if (existingUser.email === userInfo.email) {
         return next(new ApiError("This user email already exists", 409));
       }
-      if (existingUser.phoneNumber === userData.phoneNumber) {
+      if (existingUser.phoneNumber === userInfo.phoneNumber) {
         return next(new ApiError("This user phone number already exists", 409));
       }
-      if (existingUser.nationalID === userData.nationalID) {
+      if (existingUser.nationalID === userInfo.nationalID) {
         return next(new ApiError("This user national ID already exists", 409));
       }
     }
 
-    const country = await Countries.findByPk(phoneKey);
+    const country = await Countries.findByPk(userInfo.phoneKey);
     if (!country) {
       return next(new ApiError("Country key is not found", 404));
     }
 
-    const user = await User.create(userData, {
+    const user = await User.create({...userInfo,userExperience}, {
       include: [
         { model: Countries, attributes: ["countryKey"] },
         { model: Experience, as: "userExperience" },
@@ -130,12 +126,14 @@ module.exports.createUser = async (req, res, next) => {
   }
 };
 
+
 module.exports.updateUser = async (req, res, next) => {
   const {
     userExperience,
     permissions,
-    ...userData
+    userInfo
   } = req.body;
+  console.log(userInfo ,"userInfo")
   const { id } = req.params;
 
   const transaction = await sequelize.transaction();
@@ -144,7 +142,7 @@ module.exports.updateUser = async (req, res, next) => {
     if (!user) {
       return next(new ApiError("User not found", 404));
     }
-    await user.update(userData, { transaction });
+    await user.update(userInfo, { transaction });
 
     if (userExperience) {
       const existingExperiences = await user.getUserExperience({ transaction });
@@ -165,13 +163,13 @@ module.exports.updateUser = async (req, res, next) => {
               await Experience.update(exp, {
                 where: {
                   id: exp.id,
-                  user_id: user.id,
+                  user_id:id,
                 },
                 transaction,
               });
             }
           } else if (exp.id === null) {
-            await Experience.create({ ...exp, user_id: user.id }, { transaction });
+            await Experience.create({ ...exp, user_id: id }, { transaction });
           }
     
           idsToBeDeleted.map(async(expId)=>{

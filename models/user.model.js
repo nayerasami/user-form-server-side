@@ -42,7 +42,6 @@ const User = sequelize.define("user", {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
     validate: {
       is: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
     },
@@ -57,7 +56,6 @@ const User = sequelize.define("user", {
   phoneNumber: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
     validate: {
       is: /^[0-9]+$/i,
     },
@@ -65,7 +63,6 @@ const User = sequelize.define("user", {
   nationalID: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
     validate: {
       is: /^[0-9]+$/i,
     },
@@ -105,7 +102,12 @@ const User = sequelize.define("user", {
     type: DataTypes.ENUM("Single", "Divorced", "Married", "Widower"),
     allowNull: false,
   },
-});
+},{indexes:[
+  {unique:true, fields: ['email']},
+  {unique:true, fields: ['nationalID']},
+  {unique:true, fields: ['phoneNumber']},
+
+]});
 
 
 

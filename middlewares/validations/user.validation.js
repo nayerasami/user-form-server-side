@@ -6,6 +6,7 @@ const maritalStatus = ["Single", "Divorced", "Married", "Widower"];
 module.exports.validateAddUser = joi.object({
 
 
+  userInfo: joi.object({
     firstNameAR: joi.string().required().min(2).pattern(/^[\u0600-\u06FF\s]+$/u).trim(),
     lastNameAR: joi.string().required().min(2).pattern(/^[\u0600-\u06FF\s]+$/u).trim(),
     firstNameEN: joi.string().required().min(2).pattern(/^[a-zA-Z\s]+$/i).trim(),
@@ -25,6 +26,7 @@ module.exports.validateAddUser = joi.object({
   addressEN: joi.string().required().min(8).max(150).pattern(/^[a-zA-Z\s]+$/i).trim(),
   gender: joi.string().valid(...gender).required().min(2).trim(),
   maritalStatus: joi.string().valid(...maritalStatus).required().min(2).trim(),
+    }).required(),
   userExperience: joi.array().items(
        joi.object({
         companyName: joi.string().required().min(2).trim(),
@@ -45,8 +47,8 @@ module.exports.validateAddUser = joi.object({
 
 
 module.exports.validateEditUser = joi.object({
-
   id: joi.number().integer().positive().required(),
+  userInfo: joi.object({
   firstNameAR: joi.string().optional().min(2).pattern(/^[\u0600-\u06FF\s]+$/u).trim(),
   lastNameAR: joi.string().optional().min(2).pattern(/^[\u0600-\u06FF\s]+$/u).trim(),
   firstNameEN: joi.string().optional().min(2).pattern(/^[a-zA-Z\s]+$/i).trim(),
@@ -66,9 +68,10 @@ module.exports.validateEditUser = joi.object({
   addressEN: joi.string().optional().min(8).max(150).pattern(/^[a-zA-Z\s]+$/i).trim(),
   gender: joi.string().valid(...gender).optional().min(2).trim(),
   maritalStatus: joi.string().valid(...maritalStatus).optional().min(2).trim(),
+  }).optional(),
   userExperience: joi.array().items(
       joi.object({
-        id: joi.number().integer().positive().optional(),
+        id: joi.optional(),
         companyName: joi.string().required().min(2).trim(),
         startDate: joi.date().required(),
         endDate: joi.date().optional(),
