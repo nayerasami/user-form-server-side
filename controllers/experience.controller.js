@@ -45,7 +45,6 @@ module.exports.updateExperience = async (req, res, next) => {
       user_id: userId,
     },
   });
-  console.log(affectedRows,"affected rows")
   if (affectedRows === 0) {
     return next(new ApiError("experience is not found", 404));
   }

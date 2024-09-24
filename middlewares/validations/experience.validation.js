@@ -26,8 +26,12 @@ module.exports.validateAddExperience=joi.object({
 })
 
 module.exports.validateEditExperience =joi.object({
-    companyName:joi.string().required().trim(),
-    startDate:joi.date().required().custom((value,helpers)=>{
+
+
+    id:joi.number().integer().positive().required(),
+    userId:joi.number().integer().positive().required(),
+    companyName:joi.string().required().trim().optional(),
+    startDate:joi.date().optional().custom((value,helpers)=>{
         const currentDate =new Date();
         if(value >= currentDate){
             return helpers.message("end date must be in the past")
@@ -46,4 +50,5 @@ module.exports.validateEditExperience =joi.object({
         return value;
       }),
       currentlyWorking :joi.boolean().optional()
+
 })

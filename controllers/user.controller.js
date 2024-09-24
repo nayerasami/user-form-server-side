@@ -57,39 +57,13 @@ module.exports.getOneUser = async (req, res, next) => {
 
 module.exports.createUser = async (req, res, next) => {
   const {
-    firstNameAR,
-    lastNameAR,
-    firstNameEN,
-    lastNameEN,
-    email,
-    phoneKey,
-    phoneNumber,
-    nationalID,
-    birthDate,
-    addressAr,
-    addressEN,
-    gender,
-    maritalStatus,
     userExperience,
     permissions,
+    phoneKey,
+    ...userData 
   } = req.body;
 
-  const userData = {
-    firstNameAR,
-    lastNameAR,
-    firstNameEN,
-    lastNameEN,
-    email,
-    phoneKey,
-    phoneNumber,
-    nationalID,
-    birthDate,
-    addressAr,
-    addressEN,
-    gender,
-    maritalStatus,
-    userExperience,
-  };
+
   if (!userExperience) {
     return next(new ApiError("User Experience is required", 400));
   }
@@ -101,18 +75,22 @@ module.exports.createUser = async (req, res, next) => {
   try {
     const existingUser = await User.findOne({
       where: {
-        [Op.or]: [{ email }, { phoneNumber }, { nationalID }],
+        [Op.or]: [
+          { email:userData.email }, 
+          {phoneNumber: userData.phoneNumber },
+          {nationalID: userData.nationalID }
+          ],
       },
     });
 
     if (existingUser) {
-      if (existingUser.email === email) {
+      if (existingUser.email === userData.email) {
         return next(new ApiError("This user email already exists", 409));
       }
-      if (existingUser.phoneNumber === phoneNumber) {
+      if (existingUser.phoneNumber === userData.phoneNumber) {
         return next(new ApiError("This user phone number already exists", 409));
       }
-      if (existingUser.nationalID === nationalID) {
+      if (existingUser.nationalID === userData.nationalID) {
         return next(new ApiError("This user national ID already exists", 409));
       }
     }
@@ -154,44 +132,15 @@ module.exports.createUser = async (req, res, next) => {
 
 module.exports.updateUser = async (req, res, next) => {
   const {
-    firstNameAR,
-    lastNameAR,
-    firstNameEN,
-    lastNameEN,
-    email,
-    phoneKey,
-    phoneNumber,
-    nationalID,
-    birthDate,
-    addressAr,
-    addressEN,
-    gender,
-    maritalStatus,
     userExperience,
     permissions,
+    ...userData
   } = req.body;
-
-  const userData = {
-    firstNameAR,
-    lastNameAR,
-    firstNameEN,
-    lastNameEN,
-    email,
-    phoneKey,
-    phoneNumber,
-    nationalID,
-    birthDate,
-    addressAr,
-    addressEN,
-    gender,
-    maritalStatus,
-  };
   const { id } = req.params;
 
   const transaction = await sequelize.transaction();
   try {
     const user = await User.findOne({ where: { id }, transaction });
-    console.log(user, "user data");
     if (!user) {
       return next(new ApiError("User not found", 404));
     }
@@ -261,7 +210,6 @@ module.exports.deleteUser = async (req, res, next) => {
   const { id } = req.params;
 
   const deletedUser = await User.destroy({ where: { id } });
-  console.log(deletedUser, "deleted user");
   if (deletedUser === 0) {
     return next(new ApiError("user not found", 404));
   }
@@ -269,7 +217,6 @@ module.exports.deleteUser = async (req, res, next) => {
 };
 
 module.exports.CheckEmail = async (req, res, next) => {
-  console.log("Check-email route hit");
   const { email } = req.query;
 
   const user = await User.findOne({ where: { email } });
