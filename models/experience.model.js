@@ -1,16 +1,20 @@
 const sequelize = require("../config/db.config");
 const { DataTypes } = require("sequelize");
-const User=require('./user.model')
+const User = require("./user.model");
 
 const Experience = sequelize.define("experience", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,  
+    primaryKey: true,  
+  },
   user_id: {
     type: DataTypes.INTEGER,
     references: {
       model: User,
       key: "id",
     },
-    primaryKey: true,
-    allowNull:false
+    allowNull: false,
   },
   companyName: {
     type: DataTypes.STRING,
@@ -19,13 +23,12 @@ const Experience = sequelize.define("experience", {
   startDate: {
     type: DataTypes.DATE,
     allowNull: false,
-    primaryKey: true,
     validate: {
       isDateInThePast(value) {
         const currentDate = new Date();
         const selectedDate = value;
         if (selectedDate >= currentDate) {
-          throw new Error("Date Must Be in the past");
+          throw new Error("Date must be in the past");
         }
       },
     },
@@ -35,15 +38,15 @@ const Experience = sequelize.define("experience", {
     allowNull: true,
     validate: {
       isDateInThePast(value) {
-        const currentDate =new Date();
+        const currentDate = new Date();
         const selectedDate = value;
         if (selectedDate >= currentDate) {
-          throw new Error("Date Must Be in the past");
+          throw new Error("Date must be in the past");
         }
       },
       checkEndDateAndJoinDate(value) {
         if (value <= this.startDate) {
-          throw new Error("Inappropriate Date ");
+          throw new Error("End date cannot be earlier than start date");
         }
       },
     },
@@ -53,6 +56,5 @@ const Experience = sequelize.define("experience", {
     allowNull: true,
   },
 }, { timestamps: false });
-
 
 module.exports = Experience;

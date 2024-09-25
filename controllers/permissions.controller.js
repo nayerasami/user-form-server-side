@@ -36,7 +36,6 @@ module.exports.updatePermission = async (req, res, next) => {
   const [affectedRows] = await Permissions.update(updatedData, {
     where: { id },
   });
-  console.log(affectedRows,"affected rows")
   if (affectedRows === 0) {
     return next(new ApiError("permission is not found", 404));
   }

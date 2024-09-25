@@ -17,7 +17,7 @@ User.belongsToMany(Permissions,{
     through: userPermissions
 })
 Permissions.belongsToMany(User,{
-     through: userPermissions
+through: userPermissions
 })
 User.hasMany(userPermissions)
 userPermissions.belongsTo(User)

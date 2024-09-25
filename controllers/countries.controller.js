@@ -1,28 +1,63 @@
+const { Op } = require("sequelize");
 const Countries = require("../models/countries.model");
 const ApiError = require("../utilities/ErrorClass");
 
-module.exports.getAllCountries = async (req, res, next) => {
+// module.exports.getAllCountries = async (req, res, next) => {
+//   const page = req.query.page * 1 || 1;
+//   const limit = req.query.limit * 1 || 10;
+//   const search = req.query.search ? req.query.search.toLowerCase() : "";
+//   const startIndex = (page - 1) * limit;
+//   const endIndex = page * limit;
+//   const countries = await Countries.findAll({});
+//   let searchArray = countries;
+
+//   const totalNumber = countries.length;
+//   const numberOfPages = Math.ceil(totalNumber / limit);
+
+//   if (search) {
+//     searchArray = countries.filter((country) => {
+//       return country.countryName.toLowerCase().includes(search);
+//     });
+//   }
+
+//   const countriesArr = searchArray.slice(startIndex, endIndex);
+
+//   res.status(200).json({ status: "success" , data: { totalNumber, page, numberOfPages, items: countriesArr }});
+// };
+
+
+module.exports.getAllCountries= async(req,res,next)=>{
+
   const page = req.query.page * 1 || 1;
   const limit = req.query.limit * 1 || 10;
   const search = req.query.search ? req.query.search.toLowerCase() : "";
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const countries = await Countries.findAll({});
-  let searchArray = countries;
 
-  const totalNumber = countries.length;
-  const numberOfPages = Math.ceil(totalNumber / limit);
+  const offset = (page - 1) * limit;
+  
+  const {count,rows} = await Countries.findAndCountAll({
 
-  if (search) {
-    searchArray = countries.filter((country) => {
-      return country.countryName.toLowerCase().includes(search);
-    });
-  }
+    where: search
+        ? {
+            countryName: {
+              [Op.like]: `%${search}%`,
+            },
+          }
+        : {}, 
+    offset,
+    limit
+  })
 
-  const countriesArr = searchArray.slice(startIndex, endIndex);
+  res.status(200).json({
+     status: "success" , data: { 
+     totalNumber:count ,
+     page,
+     numberOfPages:Math.ceil(count / limit),
+     items: rows 
+    }});
 
-  res.status(200).json({ status: "success" , data: { totalNumber, page, numberOfPages, items: countriesArr }});
-};
+
+} 
+
 
 module.exports.getCountryByPK = async (req, res, next) => {
   const { id } = req.params;

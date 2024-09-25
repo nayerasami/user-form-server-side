@@ -12,7 +12,7 @@ module.exports.getOneExperience = async (req, res, next) => {
   const { userId, id } = req.params;
   const experience = await Experience.findOne({
     where: {
-      startDate: new Date(id),
+      id,
       user_id: userId,
     },
   });
@@ -41,17 +41,16 @@ module.exports.updateExperience = async (req, res, next) => {
 
   const [affectedRows] = await Experience.update(updatedData, {
     where: {
-      startDate: new Date(id),
+      id,
       user_id: userId,
     },
   });
-  console.log(affectedRows,"affected rows")
   if (affectedRows === 0) {
     return next(new ApiError("experience is not found", 404));
   }
   const updatedExperience = await Experience.findOne({
     where: {
-      startDate: new Date(id),
+      id,
       user_id: userId,
     },
   });
@@ -62,7 +61,7 @@ module.exports.deleteExperience = async (req, res, next) => {
   const { userId, id } = req.params;
   const deletedExperience = await Experience.destroy({
     where: {
-      startDate: new Date(id),
+      id,
       user_id: userId,
     },
   });
