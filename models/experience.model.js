@@ -44,7 +44,7 @@ const Experience = sequelize.define("experience", {
           throw new Error("Date must be in the past");
         }
       },
-      checkEndDateAndJoinDate(value) {
+      isAppropriateDate(value) {
         if (value <= this.startDate) {
           throw new Error("End date cannot be earlier than start date");
         }

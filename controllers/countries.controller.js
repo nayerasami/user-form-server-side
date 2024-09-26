@@ -53,7 +53,6 @@ module.exports.getAllCountries= async(req,res,next)=>{
      items: rows 
     }});
 
-
 } 
 
 
