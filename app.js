@@ -12,14 +12,18 @@ require('./models/association');
 dotenv.config()
 const app =express()
 
-
 bootstrap(app,express);
 
-
-
-
-
 const port =process.env.PORT || 3000
-app.listen( port,()=>{
+
+const server = app.listen( port,()=>{
     console.log(`app is listening on port ${port}`)
+})
+
+process.on('unhandledRejection', (error) => {
+    console.error(`unhandledRejection error ${error.name}, ${error.message} `);
+    server.close(() => {
+        console.error('Shutting Down ...');
+        process.exit(1);
+    })
 })

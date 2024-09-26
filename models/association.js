@@ -6,7 +6,7 @@ const userPermissions = require('./user_permissions');
 //const userPermissions = require('./user_permissions');
 
 
-User.hasMany(Experience,{foreignKey:'user_id', as: 'userExperience'})
+User.hasMany(Experience,{foreignKey:'user_id', as: 'userExperience', onDelete: 'CASCADE' })
 Experience.belongsTo(User,{foreignKey:'user_id'})
 
 

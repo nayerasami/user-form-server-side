@@ -36,13 +36,11 @@ module.exports.getAllCountries= async(req,res,next)=>{
   
   const {count,rows} = await Countries.findAndCountAll({
 
-    where: search
-        ? {
+    where: search ? {
             countryName: {
               [Op.like]: `%${search}%`,
             },
-          }
-        : {}, 
+          }:{}, 
     offset,
     limit
   })
