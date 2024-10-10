@@ -6,6 +6,7 @@ require('./models/experience.model')
 require('./models/countries.model')
 require('./models/permissions.model')
 require('./models/user_permissions')
+require('./models/attachment')
 require('./models/association');
 
 

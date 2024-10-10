@@ -3,6 +3,7 @@ const Experience =require('./experience.model');
 const Permissions =require('./permissions.model');
 const Countries =require('./countries.model');
 const userPermissions = require('./user_permissions');
+const Attachment = require('./attachment');
 //const userPermissions = require('./user_permissions');
 
 
@@ -25,4 +26,18 @@ userPermissions.belongsTo(User)
 Permissions.hasMany(userPermissions)
 userPermissions.belongsTo(Permissions)
 
-module.exports = { User, userPermissions,Experience, Permissions, Countries };
+User.hasMany(Attachment ,{
+    foreignKey :'attachable_id',
+    scope: {
+        attachable_type: "userPic",
+      }
+})
+
+Countries.hasMany(Attachment ,{
+    foreignKey:'attachable_id',
+    scope:{
+        attachable_type:"countryFlag"
+    }
+})
+
+module.exports = { User, userPermissions,Experience, Permissions, Countries ,Attachment};

@@ -6,13 +6,14 @@ const userRouter = require('./user.routes.js');
 const countriesRouter = require('./countries.routes.js');
 const permissionsRouter = require('./permission.routes.js');
 const experienceRouter = require('./experience.routes.js');
+// const attachmentRouter = require("./attachment.route.js");
 require('../models/user.model.js')
 require('../models/experience.model')
 require('../models/countries.model')
 require('../models/permissions.model')
 require('../models/user_permissions.js')
+require('../models/attachment.js')
 require('../models/association.js');
-
 
 const bootstrap = (app, express) => {
   app.use(express.json());
@@ -32,6 +33,7 @@ const bootstrap = (app, express) => {
   app.use("/api/v1/countries", countriesRouter);
   app.use("/api/v1/permissions", permissionsRouter);
   app.use("/api/v1/experience", experienceRouter);
+  // app.use('/api/v1/attachment', attachmentRouter)
 
 
   app.use("*", (req, res, next) => {

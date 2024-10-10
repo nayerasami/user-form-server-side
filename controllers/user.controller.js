@@ -6,6 +6,9 @@ const Permissions = require("../models/permissions.model");
 const User = require("../models/user.model");
 const UserPermissions = require("../models/user_permissions");
 const ApiError = require("../utilities/ErrorClass");
+const cloudinary = require("../config/cloudinary.config");
+const sharp = require("sharp");
+const attachment = require("../models/attachment");
 
 module.exports.getAllUsers = async (req, res, next) => {
   const users = await User.findAll({
@@ -56,14 +59,9 @@ module.exports.getOneUser = async (req, res, next) => {
 };
 
 module.exports.createUser = async (req, res, next) => {
-  const {
-    userExperience,
-    permissions,
-    userInfo
+  const { userExperience, permissions, userInfo } = req.body;
 
-  } = req.body;
-
-console.log(userInfo ,"user info ")
+  console.log(userInfo, "user info ");
   if (!userExperience) {
     return next(new ApiError("User Experience is required", 400));
   }
@@ -75,7 +73,11 @@ console.log(userInfo ,"user info ")
   try {
     const existingUser = await User.findOne({
       where: {
-        [Op.or]: [{ email :userInfo.email}, { phoneNumber:userInfo.phoneNumber }, { nationalID :userInfo.nationalID}],
+        [Op.or]: [
+          { email: userInfo.email },
+          { phoneNumber: userInfo.phoneNumber },
+          { nationalID: userInfo.nationalID },
+        ],
       },
     });
 
@@ -96,13 +98,16 @@ console.log(userInfo ,"user info ")
       return next(new ApiError("Country key is not found", 404));
     }
 
-    const user = await User.create({...userInfo,userExperience}, {
-      include: [
-        { model: Countries, attributes: ["countryKey"] },
-        { model: Experience, as: "userExperience" },
-      ],
-      transaction,
-    });
+    const user = await User.create(
+      { ...userInfo, userExperience },
+      {
+        include: [
+          { model: Countries, attributes: ["countryKey"] },
+          { model: Experience, as: "userExperience" },
+        ],
+        transaction,
+      }
+    );
     if (!user) {
       return next(new ApiError("User creation failed", 500));
     }
@@ -117,6 +122,32 @@ console.log(userInfo ,"user info ")
       );
     }
 
+    user.getAttachments()
+    if (req.file) {
+      const resizedImage = await sharp(req.file.buffer)
+        .resize(200, 200)
+        .jpeg({ quality: 80 })
+        .toBuffer();
+
+      if (resizedImage.length > 10485760) {
+        return next(
+          new ApiError("Compressed image size is still too large", 400)
+        );
+      }
+
+      cloudinary.uploader.upload_stream({ folder: "user-images" }, async (error, result) => {
+        if (error) {
+          return next(error);
+        }
+
+        await attachment.create({
+          attachable_type: "userPic",
+          attachable_id: user.id,
+          name: result.secure_url,
+        }, { transaction });
+      }).end(resizedImage);
+    }
+
     await transaction.commit();
 
     res.status(201).json({ status: "success", data: { user } });
@@ -126,14 +157,9 @@ console.log(userInfo ,"user info ")
   }
 };
 
-
 module.exports.updateUser = async (req, res, next) => {
-  const {
-    userExperience,
-    permissions,
-    userInfo
-  } = req.body;
-  console.log(userInfo ,"userInfo")
+  const { userExperience, permissions, userInfo } = req.body;
+  console.log(userInfo, "userInfo");
   const { id } = req.params;
 
   const transaction = await sequelize.transaction();
@@ -152,9 +178,9 @@ module.exports.updateUser = async (req, res, next) => {
       const idsToBeUpdated = existingExperiencesIDs.filter((el) =>
         userExperienceIDs.includes(el)
       );
-      const idsToBeDeleted = existingExperiencesIDs.filter((exp) => 
-        !idsToBeUpdated.includes(exp)
-      )
+      const idsToBeDeleted = existingExperiencesIDs.filter(
+        (exp) => !idsToBeUpdated.includes(exp)
+      );
 
       await Promise.all(
         userExperience.map(async (exp) => {
@@ -163,7 +189,7 @@ module.exports.updateUser = async (req, res, next) => {
               await Experience.update(exp, {
                 where: {
                   id: exp.id,
-                  user_id:id,
+                  user_id: id,
                 },
                 transaction,
               });
@@ -171,21 +197,18 @@ module.exports.updateUser = async (req, res, next) => {
           } else if (exp.id === null) {
             await Experience.create({ ...exp, user_id: id }, { transaction });
           }
-    
-          idsToBeDeleted.map(async(expId)=>{
+
+          idsToBeDeleted.map(async (expId) => {
             await Experience.destroy({
               where: {
-                id:expId,
+                id: expId,
                 user_id: id,
               },
-              transaction
-            })
-          })
-        
+              transaction,
+            });
+          });
         })
       );
-
-
     }
 
     if (permissions && permissions.length) {
