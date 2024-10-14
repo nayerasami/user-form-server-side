@@ -73,7 +73,7 @@ module.exports.addNewCountry = async (req, res, next) => {
   });
 
   if (existedCountryName) {
-    return next(new ApiError("this country name already exist ", 409));
+   throw new ApiError("this country name already exist ", 409);
   }
   const newCountry = await Countries.create({ countryName, countryKey });
 
